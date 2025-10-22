@@ -8,6 +8,8 @@ import java.util.Scanner;
 
 public class Creation {
 
+    private static final int INITIAL_BAL = 69; // Encapsulate Field
+
     void createAccFun() throws IOException {
         int accNo = accNoCreation();
         String[] accLineInfo = getUserInfoFromUser();
@@ -34,8 +36,6 @@ public class Creation {
             System.out.println("Please provide both first name and last name.");
             return getUserInfoFromUser();
         }
-        accLineInfo[0] = fullNameArr[0];
-        accLineInfo[1] = fullNameArr[1];
 
         System.out.println("Enter your Date of Birth (YYYY-MM-DD): ");
         accLineInfo[2] = scanner.nextLine();
@@ -52,15 +52,16 @@ public class Creation {
         System.out.println("Create a Password for your Account: ");
         accLineInfo[8] = scanner.nextLine();
         return accLineInfo;
-        }
+    }
 
     int accNoCreation() throws IOException {
         String lastLine = "";
         int accNo;
         File file = new File("db/credentials.txt");
-        Scanner scanner = new Scanner(file);
-        while (scanner.hasNextLine()) {
-            lastLine = scanner.nextLine();
+        try (Scanner scanner = new Scanner(file)) {
+            while (scanner.hasNextLine()) {
+                lastLine = scanner.nextLine();
+            }
         }
         if (Objects.equals(lastLine, "")) {
             accNo = 1;
@@ -73,27 +74,23 @@ public class Creation {
     }
 
     void credWrite(int accNo, String[] accLineInfo) throws IOException {
-        FileWriter writer = new FileWriter("db/credentials.txt", true);
-        writer.write("\n" + accNo + " " + accLineInfo[8]);
-        writer.close();
+        try (FileWriter writer = new FileWriter("db/credentials.txt", true)) {
+            writer.write("\n" + accNo + " " + accLineInfo[8]);
+        }
     }
 
     void balWrite(int accNo) throws IOException {
-        int initialBal = 69;
-        FileWriter writer = new FileWriter("db/balanceDB.txt", true);
-        writer.write("\n" + accNo + " " + initialBal);
-        writer.close();
+        try (FileWriter writer = new FileWriter("db/balanceDB.txt", true)) {
+            writer.write("\n" + accNo + " " + INITIAL_BAL);
+        }
     }
 
     void userWrite(int accNo, String[] accLineInfo) throws IOException {
-        FileWriter writer = new FileWriter("db/userDB.txt", true);
-        writer.write("\n" + accNo + " ");
-        for (int i = 0; i < 8; i++) {
-            writer.write(accLineInfo[i] + " ");
+        try (FileWriter writer = new FileWriter("db/userDB.txt", true)) {
+            writer.write("\n" + accNo + " ");
+            for (int i = 0; i < 8; i++) {
+                writer.write(accLineInfo[i] + " ");
+            }
         }
-        writer.close();
     }
-
-
 }
-
