@@ -1,10 +1,9 @@
 package org.example;
 
-import com.sun.tools.javac.Main;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Scanner;
+
 
 public class AccountDetails {
     void accountDetailsFun(int accNo) throws IOException {
