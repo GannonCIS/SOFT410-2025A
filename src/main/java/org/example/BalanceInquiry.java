@@ -9,6 +9,7 @@ public class BalanceInquiry {
         File file = new File("db/balanceDB.txt");
         int accBalance = -1;
 
+
         try (Scanner scanner = new Scanner(file)) {
             while (scanner.hasNextLine()) {
                 String[] subLine = scanner.nextLine().split(" ");
