@@ -22,17 +22,29 @@ public class Transaction {
         allTransaction(accNo, receiverAcc, transferAmount, remarks);
     }
 
+
+
     void allTransaction(int accNo, int rAccNo, int tAmount, String tRemarks) throws IOException {
+
+        //Step 1: Validate receiver account
         if (!rAccCheck(rAccNo)) {
             System.out.println("Incorrect Account Number!");
             return;
         }
+
+        //Step 2: Validate sender balance
         if (!sAccBalCheck(accNo, tAmount)) {
             System.out.println("Insufficient Balance!");
             return;
         }
+
+        //Step 3: Apply the transaction
         applyTransaction(accNo, rAccNo, tAmount);
+
+        //Step 4: Record the transaction
         writeTransaction(accNo, rAccNo, tAmount, tRemarks);
+
+        //Step 5: Finalize
         System.out.println("Transaction Successful!");
         System.out.println("Press Enter key to continue...");
         new Scanner(System.in).nextLine();
