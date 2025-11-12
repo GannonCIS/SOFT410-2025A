@@ -3,9 +3,14 @@ package org.example;
 import java.io.IOException;
 import java.util.Scanner;
 
+
+//Client class (Factory pattern)
 public class Main {
 
+    private static BankServiceFactory serviceFactory;
+
     public static void main(String[] args) throws IOException {
+        serviceFactory = new BankServiceFactory();
         intro();
     }
 
@@ -29,11 +34,11 @@ public class Main {
     }
 
     private static void loginAcc() throws IOException {
-        new Login().loginFun();
+        serviceFactory.createLogin().loginFun();
     }
 
     private static void createAcc() throws IOException {
-        new Creation().createAccFun();
+        serviceFactory.createCreation().createAccFun();
     }
 
     static void menu(int accNo) throws IOException {
@@ -57,12 +62,12 @@ public class Main {
 
     private static void handleMenuChoice(int choice, int accNo) throws IOException {
         switch (choice) {
-            case 1 -> new BalanceInquiry().balanceInquiryFun(accNo);
-            case 2 -> new AccountDetails().accountDetailsFun(accNo);
-            case 3 -> new Transaction().transactionFun(accNo);
-            case 4 -> new BankStatement().bankStatementFun(accNo);
+            case 1 -> serviceFactory.createBalanceInquiry().balanceInquiryFun(accNo);
+            case 2 -> serviceFactory.createAccountDetails().accountDetailsFun(accNo);
+            case 3 -> serviceFactory.createTransaction().transactionFun(accNo);
+            case 4 -> serviceFactory.createBankStatement().bankStatementFun(accNo);
             case 5 -> {
-                Deletion d = new Deletion();
+                Deletion d = serviceFactory.createDeletion();
                 d.accCloseFun(accNo, "db/credentials.txt");
                 d.delLine(accNo, "db/userDB.txt");
                 d.delLine(accNo, "db/balanceDB.txt");
