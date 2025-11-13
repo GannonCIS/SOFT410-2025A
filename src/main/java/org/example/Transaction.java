@@ -4,11 +4,45 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.List;
 
+//Observer pattern: Subject (the thing being observed)
+
+/*Benefit of observer: The Transaction class no longer needs to
+know HOW to write bank statements, it just announces WHEN transactions happen.
+The BankStatementObserver handles the "how".
+*/
 public class Transaction {
+
+    //OBSERVER PATTERN: List to keep track of all observers
+    private final List<TransactionObserver> observes = new ArrayList<>();
+
+    //OBSERVER PATTERN: Constructor to register observer
+    public Transaction(){
+        observes.add(new BankStatementObserver());
+    }
+
+    //OBSERVER PATTERN: Method to add more observers
+    public void addObserver(TransactionObserver observer){
+        observes.add(observer);
+    }
+
+
+    public void notifyObservers(TransactionEvent event){
+        for(TransactionObserver observer : observes){
+            try{
+                observer.onTransactionCompleted(event);
+            }catch(Exception e){
+                System.out.println("Observer error: " + e.getMessage());
+            }
+        }
+    }
+
+
+
+
     void transactionFun(int accNo) throws IOException {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Receiver's Account Number: ");
@@ -41,8 +75,8 @@ public class Transaction {
         //Step 3: Apply the transaction
         applyTransaction(accNo, rAccNo, tAmount);
 
-        //Step 4: Record the transaction
-        writeTransaction(accNo, rAccNo, tAmount, tRemarks);
+        //Step 4 (OBSERVER PATTERN): Notify observers of successful transaction
+        notifyObservers(new TransactionEvent(accNo, rAccNo, tAmount, tRemarks, true));
 
         //Step 5: Finalize
         System.out.println("Transaction Successful!");
@@ -88,26 +122,4 @@ public class Transaction {
         }
     }
 
-    void writeTransaction(int accNo, int rAccNo, int tAmount, String tRemarks) throws IOException {
-        debitWrite(accNo, rAccNo, tAmount, tRemarks);
-        creditWrite(accNo, rAccNo, tAmount, tRemarks);
-    }
-
-    void debitWrite(int accNo, int rAccNo, int tAmount, String tRemarks) throws IOException {
-        String description = "Transfer to " + rAccNo;
-        String date = java.time.LocalDate.now().toString();
-        String time = DateTimeFormatter.ofPattern("HH:mm:ss").format(LocalDateTime.now());
-        try (Writer writer = new FileWriter("db/Bank Statement/acc_" + accNo + ".txt", true)) {
-            writer.write(description + " Debit " + tAmount + " " + tRemarks + " " + date + " " + time + "\n");
-        }
-    }
-
-    void creditWrite(int accNo, int rAccNo, int tAmount, String tRemarks) throws IOException {
-        String description = "Transfer from " + accNo;
-        String date = java.time.LocalDate.now().toString();
-        String time = DateTimeFormatter.ofPattern("HH:mm:ss").format(LocalDateTime.now());
-        try (Writer writer = new FileWriter("db/Bank Statement/acc_" + rAccNo + ".txt", true)) {
-            writer.write(description + " Credit " + tAmount + " " + tRemarks + " " + date + " " + time + "\n");
-        }
-    }
 }
