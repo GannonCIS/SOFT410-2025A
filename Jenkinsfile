@@ -19,5 +19,11 @@ pipeline {
                 echo 'Deploying....'
             }
         }
+        post {
+                always {
+                    echo 'Creating test report'
+                    junit '**/build/test-results/test/*.xml'
+                }
+            }
     }
 }
