@@ -2,7 +2,6 @@ package org.example;
 
 import java.time.LocalDateTime;
 
-
 //Event object (Data package with event information)
 
 //Instead of passing 5 separate parameters, we pass one clean object
