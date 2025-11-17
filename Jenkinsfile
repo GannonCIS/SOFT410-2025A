@@ -27,6 +27,14 @@ pipeline {
         always {
             echo 'Creating test report'
             junit '**/build/test-results/test/*.xml'
+            publishHTML(target: [
+                reportDir: 'build/reports/tests/test',
+                reportFiles: 'index.html',
+                reportName: 'JUnit HTML Report',
+                alwaysLinkToLastBuild: true,
+                allowMissing: true,
+                keepAll: true
+            ])
         }
     }
 }
