@@ -1,11 +1,16 @@
 package org.example;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.Scanner;
 
+
+//Client class (Factory pattern)
 public class Main {
 
+    private static BankServiceFactory serviceFactory;
+
     public static void main(String[] args) throws IOException {
+        serviceFactory = new BankServiceFactory();
         intro();
     }
 
@@ -17,29 +22,34 @@ public class Main {
         System.out.println("│ Type 1: Login                 │");
         System.out.println("│ Type 2: Create Account        │");
         System.out.println("└───────────────────────────────┘");
-        int choiceAcc = scanner.nextInt();
-        if (choiceAcc == 1) loginAcc();
-        else if (choiceAcc == 2) createAcc();
-        else {
-            System.out.println("Incorrect! Choose a valid option again.");
-            intro();
+        int choice = scanner.nextInt();
+        switch (choice) {
+            case 1 -> loginAcc();
+            case 2 -> createAcc();
+            default -> {
+                System.out.println("Incorrect! Choose a valid option again.");
+                intro();
+            }
         }
     }
 
     private static void loginAcc() throws IOException {
-        Login loginFun = new Login();
-        loginFun.loginFun();
+        serviceFactory.createLogin().loginFun();
     }
 
     private static void createAcc() throws IOException {
-        Creation creationAccFun = new Creation();
-        creationAccFun.createAccFun();
+        serviceFactory.createCreation().createAccFun();
     }
 
     static void menu(int accNo) throws IOException {
+        printMenu();
+        int choice = new Scanner(System.in).nextInt();
+        handleMenuChoice(choice, accNo);
+    }
+
+    private static void printMenu() {
         System.out.println("┌────────────────────────────┐");
         System.out.println("│           Menu:            │");
-        System.out.println("│                            │");
         System.out.println("│ Type 1: Balance Inquiry    │");
         System.out.println("│ Type 2: Account Details    │");
         System.out.println("│ Type 3: Fund Transfer      │");
@@ -48,14 +58,22 @@ public class Main {
         System.out.println("│ Type 6: Log out            │");
         System.out.println("│ Type 7: Exit               │");
         System.out.println("└────────────────────────────┘");
-        Scanner scanner = new Scanner(System.in);
-        int choice = scanner.nextInt();
+    }
+
+    private static void handleMenuChoice(int choice, int accNo) throws IOException {
         switch (choice) {
-            case 1 -> balInquiry(accNo);
-            case 2 -> accDetails(accNo);
-            case 3 -> fundTransfer(accNo);
-            case 4 -> tranHistory(accNo);
-            case 5 -> accClose(accNo);
+            case 1 -> serviceFactory.createBalanceInquiry().balanceInquiryFun(accNo);
+            case 2 -> serviceFactory.createAccountDetails().accountDetailsFun(accNo);
+            case 3 -> serviceFactory.createTransaction().transactionFun(accNo);
+            case 4 -> serviceFactory.createBankStatement().bankStatementFun(accNo);
+            case 5 -> {
+                Deletion d = serviceFactory.createDeletion();
+                d.accCloseFun(accNo, "db/credentials.txt");
+                d.delLine(accNo, "db/userDB.txt");
+                d.delLine(accNo, "db/balanceDB.txt");
+                System.out.println("\nAccount successfully Deleted.");
+                System.exit(0);
+            }
             case 6 -> {
                 System.out.println("Logged out successfully!");
                 intro();
@@ -66,37 +84,5 @@ public class Main {
                 menu(accNo);
             }
         }
-
     }
-
-    private static void balInquiry(int accNo) throws IOException {
-        BalanceInquiry balanceInquiryFun = new BalanceInquiry();
-        balanceInquiryFun.balanceInquiryFun(accNo);
-    }
-
-    private static void accDetails(int accNo) throws IOException {
-        AccountDetails accountDetailsFun = new AccountDetails();
-        accountDetailsFun.accountDetailsFun(accNo);
-    }
-
-    private static void fundTransfer(int accNo) throws IOException {
-        Transaction transactionFun= new Transaction();
-        transactionFun.transactionFun(accNo);
-    }
-
-    private static void tranHistory(int accNo) throws IOException {
-        BankStatement bankStatementFun = new BankStatement();
-        bankStatementFun.bankStatementFun(accNo);
-    }
-
-    private static void accClose(int accNo) throws IOException {
-        Deletion accCloseFun = new Deletion();
-        accCloseFun.accCloseFun(accNo,"db/credentials.txt");
-        accCloseFun.delLine(accNo,"db/userDB.txt");
-        accCloseFun.delLine(accNo,"db/balanceDB.txt");
-        System.out.println("\nAccount successfully Deleted.");
-        System.exit(0);
-    }
-
-
 }
