@@ -18,6 +18,7 @@ public class Transaction {
 
     //OBSERVER PATTERN: List to keep track of all observers
     private final List<TransactionObserver> observes = new ArrayList<>();
+    private final BalanceRepository balanceRepo = new BalanceRepository();
 
     //OBSERVER PATTERN: Constructor to register observer
     public Transaction(){
@@ -58,68 +59,40 @@ public class Transaction {
 
 
 
-    void allTransaction(int accNo, int rAccNo, int tAmount, String tRemarks) throws IOException {
+    void allTransaction(int accNo, int receiverAcc, int amount, String remarks) throws IOException {
 
-        //Step 1: Validate receiver account
-        if (!rAccCheck(rAccNo)) {
+        if (!balanceRepo.accountExists(receiverAcc)) {
             System.out.println("Incorrect Account Number!");
             return;
         }
 
-        //Step 2: Validate sender balance
-        if (!sAccBalCheck(accNo, tAmount)) {
+        if (!hasSufficientBalance(accNo, amount)) {
             System.out.println("Insufficient Balance!");
             return;
         }
 
-        //Step 3: Apply the transaction
-        applyTransaction(accNo, rAccNo, tAmount);
+        applyTransaction(accNo, receiverAcc, amount);
 
-        //Step 4 (OBSERVER PATTERN): Notify observers of successful transaction
-        notifyObservers(new TransactionEvent(accNo, rAccNo, tAmount, tRemarks, true));
+        notifyObservers(new TransactionEvent(
+                accNo,
+                receiverAcc,
+                amount,
+                remarks,
+                true
+        ));
 
-        //Step 5: Finalize
         System.out.println("Transaction Successful!");
         System.out.println("Press Enter key to continue...");
         new Scanner(System.in).nextLine();
         Main.menu(accNo);
     }
 
-    boolean rAccCheck(int rAccNo) throws IOException {
-        try (Scanner scanner = new Scanner(new File("db/balanceDB.txt"))) {
-            while (scanner.hasNextLine()) {
-                String[] subLine = scanner.nextLine().split(" ");
-                if (rAccNo == Integer.parseInt(subLine[0])) return true;
-            }
-        }
-        return false;
+    private boolean hasSufficientBalance(int accNo, int amount) throws IOException {
+        int balance = balanceRepo.getBalance(accNo);
+        return balance != -1 && balance >= amount;
     }
 
-    boolean sAccBalCheck(int accNo, int tAmount) throws IOException {
-        try (Scanner scanner = new Scanner(new File("db/balanceDB.txt"))) {
-            while (scanner.hasNextLine()) {
-                String[] subLine = scanner.nextLine().split(" ");
-                if (accNo == Integer.parseInt(subLine[0]) && tAmount <= Integer.parseInt(subLine[1])) return true;
-            }
-        }
-        return false;
+    void applyTransaction(int accNo, int receiverAcc, int amount) throws IOException {
+        balanceRepo.updateBalances(accNo, receiverAcc, amount);
     }
-
-    void applyTransaction(int accNo, int rAccNo, int tAmount) throws IOException {
-        StringBuilder newInfo = new StringBuilder();
-        try (Scanner scanner = new Scanner(new File("db/balanceDB.txt"))) {
-            while (scanner.hasNextLine()) {
-                String[] subLine = scanner.nextLine().split(" ");
-                int a = Integer.parseInt(subLine[0]);
-                int b = Integer.parseInt(subLine[1]);
-                if (accNo == a) b -= tAmount;
-                else if (rAccNo == a) b += tAmount;
-                newInfo.append(a).append(" ").append(b).append("\n");
-            }
-        }
-        try (Writer writer = new FileWriter("db/balanceDB.txt")) {
-            writer.write(newInfo.toString());
-        }
-    }
-
 }
