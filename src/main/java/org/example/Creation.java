@@ -1,41 +1,95 @@
 package org.example;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Objects;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.Date;
 import java.util.Scanner;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class Creation {
 
-    private static final int INITIAL_BAL = 69; // Encapsulate Field
+    private static final int INITIAL_BAL = 69;
 
-    void createAccFun() throws IOException {
-        int accNo = accNoCreation();
-        String[] accLineInfo = getUserInfoFromUser();
-        credWrite(accNo,accLineInfo);
-        balWrite(accNo);
-        userWrite(accNo, accLineInfo);
-        System.out.println("\nAccount created successfully!\n");
-        System.out.println("Your account number is: " + accNo);
-        System.out.println("Your password is: " + accLineInfo[8]+ "\n");
-        Main.menu(accNo);
+    void createAccFun() {
+        try {
+            int accNo = accNoCreation();
+            String[] accLineInfo = getUserInfoFromUser();
+            writeToPostgres(accNo, accLineInfo);
+
+            System.out.println("\nAccount created successfully!\n");
+            System.out.println("Your account number is: " + accNo);
+            System.out.println("Your password is: " + accLineInfo[8] + "\n");
+
+            Main.menu(accNo);
+        } catch (Exception e) {
+            System.out.println("Account creation failed: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
-    String[] getUserInfoFromUser() throws IOException {
+    int accNoCreation() {
+        int accNo = 1;
+        try (Connection conn = DriverManager.getConnection(
+                "jdbc:postgresql://localhost:5432/auth_system",
+                "postgres", "2331");
+             PreparedStatement ps = conn.prepareStatement(
+                     "SELECT MAX(username::int) AS max_acc FROM users");
+             var rs = ps.executeQuery()) {
+
+            if (rs.next() && rs.getInt("max_acc") != 0) {
+                accNo = rs.getInt("max_acc") + 1;
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error generating account number: " + e.getMessage());
+        }
+        return accNo;
+    }
+
+    void writeToPostgres(int accNo, String[] acc) {
+        try (Connection conn = DriverManager.getConnection(
+                "jdbc:postgresql://localhost:5432/auth_system",
+                "postgres", "2331")) {
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "INSERT INTO users(username, password_hash, role) VALUES (?, ?, ?)")) {
+                ps.setString(1, String.valueOf(accNo));
+                ps.setString(2, BCrypt.hashpw(acc[8], BCrypt.gensalt()));
+                ps.setString(3, "user");
+                ps.executeUpdate();
+            }
+
+            try (PreparedStatement ps2 = conn.prepareStatement(
+                    "INSERT INTO user_details(acc_no, first_name, last_name, dob, gender, address, phone, email, citizenship, balance) " +
+                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
+
+                ps2.setInt(1, accNo);
+                for (int i = 0; i < 8; i++) ps2.setString(i + 2, acc[i]);
+                ps2.setDate(4, Date.valueOf(acc[2])); // dob conversion
+                ps2.setInt(10, INITIAL_BAL);
+                ps2.executeUpdate();
+            }
+
+            System.out.println("\nPostgreSQL insertion successful!");
+
+        } catch (Exception e) {
+            System.out.println("PostgreSQL write failed: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    String[] getUserInfoFromUser() {
         String[] accLineInfo = new String[9];
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("Enter your Name: ");
-        String fullName = scanner.nextLine();
-        String[] fullNameArr = fullName.split(" ");
-        if (fullNameArr.length == 2) {
-            accLineInfo[0] = fullNameArr[0];
-            accLineInfo[1] = fullNameArr[1];
-        } else {
+        System.out.println("Enter your Name (First Last): ");
+        String[] fullNameArr = scanner.nextLine().trim().split(" ");
+        if (fullNameArr.length != 2) {
             System.out.println("Please provide both first name and last name.");
             return getUserInfoFromUser();
         }
+        accLineInfo[0] = fullNameArr[0];
+        accLineInfo[1] = fullNameArr[1];
 
         System.out.println("Enter your Date of Birth (YYYY-MM-DD): ");
         accLineInfo[2] = scanner.nextLine();
@@ -51,46 +105,7 @@ public class Creation {
         accLineInfo[7] = scanner.nextLine();
         System.out.println("Create a Password for your Account: ");
         accLineInfo[8] = scanner.nextLine();
+
         return accLineInfo;
-    }
-
-    int accNoCreation() throws IOException {
-        String lastLine = "";
-        int accNo;
-        File file = new File("db/credentials.txt");
-        try (Scanner scanner = new Scanner(file)) {
-            while (scanner.hasNextLine()) {
-                lastLine = scanner.nextLine();
-            }
-        }
-        if (Objects.equals(lastLine, "")) {
-            accNo = 1;
-        } else {
-            String[] subLine = lastLine.split(" ");
-            accNo = Integer.parseInt(subLine[0]);
-            accNo++;
-        }
-        return accNo;
-    }
-
-    void credWrite(int accNo, String[] accLineInfo) throws IOException {
-        try (FileWriter writer = new FileWriter("db/credentials.txt", true)) {
-            writer.write("\n" + accNo + " " + accLineInfo[8]);
-        }
-    }
-
-    void balWrite(int accNo) throws IOException {
-        try (FileWriter writer = new FileWriter("db/balanceDB.txt", true)) {
-            writer.write("\n" + accNo + " " + INITIAL_BAL);
-        }
-    }
-
-    void userWrite(int accNo, String[] accLineInfo) throws IOException {
-        try (FileWriter writer = new FileWriter("db/userDB.txt", true)) {
-            writer.write("\n" + accNo + " ");
-            for (int i = 0; i < 8; i++) {
-                writer.write(accLineInfo[i] + " ");
-            }
-        }
     }
 }

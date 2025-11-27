@@ -1,7 +1,0 @@
-1 Amara G 2002-05-06 Male 109 814 ganzorig001 123
-2 John Doe 2001-03-12 Male 612 W 341 johndoe@gmail.com 344
-3 Aia A 2004-07-17 Female 708 W 814-8723-8472 ahmed024 789
-4 Emily R 2001-05-17 Female Cherry St 814-864-8375 emily190 234 
-5 James G 2001-05-17 Male Peach st 814-6457-7582 James007 345 
-6 Emma G 2002-06-15 Female Cherry St 814-5762-7583 emma006 324 
-7 sara e 2003-08-14 female cherry st 814-7592-6783 sara005 692 
