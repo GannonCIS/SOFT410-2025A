@@ -1,11 +1,12 @@
-package UnitTests;
+package test;
 
 import org.example.BalanceRepository;
 import org.junit.jupiter.api.*;
 import java.io.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BalanceRepositoryUnitTesting {
+
+public class BalanceRepoUnitTest {
     private BalanceRepository repo;
     private File testFile;
 
@@ -45,5 +46,7 @@ public class BalanceRepositoryUnitTesting {
     void tearDown() {
         if (testFile.exists()) testFile.delete();
     }
+
+
 
 }

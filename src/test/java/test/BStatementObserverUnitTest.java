@@ -1,11 +1,13 @@
-package UnitTests;
+package test;
 
 import org.example.BankStatementObserver;
 import org.example.TransactionEvent;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BankStatementObserverUnitTesting {
+
+
+public class BStatementObserverUnitTest {
 
     @Test
     void onTransactionCompletedTest(){

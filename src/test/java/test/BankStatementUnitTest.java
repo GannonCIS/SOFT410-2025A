@@ -1,4 +1,4 @@
-package UnitTests;
+package test;
 
 import org.example.BankStatement;
 import org.junit.jupiter.api.*;
@@ -6,7 +6,7 @@ import java.io.*;
 import java.util.Scanner;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BankStatementUnitTesting {
+public class BankStatementUnitTest {
 
     //Declare a variable to hold the object we're testing
     private BankStatement statement;
@@ -67,4 +67,8 @@ public class BankStatementUnitTesting {
     void tearDown() {
         if (testFile.exists()) testFile.delete();
     }
+
+
+
+
 }

@@ -1,11 +1,12 @@
-package UnitTests;
+package test;
 
 import org.example.Transaction;
 import org.example.TransactionEvent;
 import org.example.TransactionObserver;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-public class TransactionObserverUnitTesting {
+
+public class TransactionObserverUnitTest {
 
     @Test
     void observerTest(){

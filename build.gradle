@@ -26,13 +26,13 @@ test {
     useJUnitPlatform()
 
     // Tell Gradle where to find your tests
-    testClassesDirs = files('src/test/java/UnitTests')
+  // testClassesDirs = files('src/test/java')
 
     // Include all packages in test source set
     sourceSets {
         test {
             java {
-                srcDirs = ['src/test/java/UnitTests']
+                srcDirs = ['src/test/java']
             }
         }
     }

@@ -1,4 +1,4 @@
-package UnitTests;
+package test;
 
 import org.example.BankStatementObserver;
 import org.example.Transaction;
@@ -7,8 +7,7 @@ import org.example.TransactionObserver;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TransactionUnitTesting {
-
+public class TransactionUnitTest {
 
     //Test if it can add observers
     @Test
@@ -31,6 +30,7 @@ public class TransactionUnitTesting {
         assertDoesNotThrow(() -> transaction.notifyObservers(event));
 
     }
+
 
 
 }

@@ -1,11 +1,11 @@
-package UnitTests;
+package test;
 
 import org.example.TransactionEvent;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TransactionEventUnitTesting {
 
+public class TransactionEventUnitTest {
     @Test
     void getFromAccountTest() {
         TransactionEvent event = new TransactionEvent(1001, 1002, 500, "Test", true);
@@ -41,7 +41,6 @@ public class TransactionEventUnitTesting {
         TransactionEvent event = new TransactionEvent(1001, 1002, 500, "Test", true);
         assertTrue(event.isSuccess());
     }
-
 
 
 

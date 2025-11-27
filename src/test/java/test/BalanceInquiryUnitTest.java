@@ -1,10 +1,11 @@
-package UnitTests;
+package test;
 
 import org.example.BalanceInquiry;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BalanceInquiryUnitTesting {
+public class BalanceInquiryUnitTest {
+
     private BalanceInquiry balanceInquiry;
 
     @BeforeEach
@@ -32,5 +33,7 @@ public class BalanceInquiryUnitTesting {
         assertEquals(1500, actual);
 
     }
+
+
 
 }
