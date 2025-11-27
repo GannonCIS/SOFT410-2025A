@@ -20,7 +20,7 @@ public class BankStatement {
         new Scanner(System.in).nextLine();
         Main.menu(accNo);
     }
-    private void printStatementLines(Scanner scanner) {
+     public void printStatementLines(Scanner scanner) {
         while (scanner.hasNextLine()) {
             String[] trLine = scanner.nextLine().split(" ");
             if (trLine.length < 8) continue;
@@ -35,7 +35,7 @@ public class BankStatement {
 // Long Method bankStatementFun() has been reduced to handle 2 clean responsibilities
 
 
-    private void printHeader() {
+    public void printHeader() {
         System.out.println("\n");
         System.out.println("                           | Bank Statement |");
         System.out.println("---------------------------------------------------------------------------");
@@ -43,7 +43,7 @@ public class BankStatement {
                 "Description", "Type", "Amount", "Remarks", "Date", "Time");
         System.out.println("---------------------------------------------------------------------------");
     }
-    private void printFooter() {
+    public void printFooter() {
         System.out.println("---------------------------------------------------------------------------");
     }
 }

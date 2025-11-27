@@ -30,7 +30,7 @@ public class Deletion {
         System.out.println("Account deleted successfully!");
     }
 
-    void deleteFromPostgres(int accNo) {
+    public void deleteFromPostgres(int accNo) {
         try (Connection conn = DriverManager.getConnection(
                 "jdbc:postgresql://localhost:5432/auth_system",
                 "postgres",

@@ -39,7 +39,7 @@ public class Main {
         creation.createAccFun();
     }
 
-    static void menu(int accNo) throws IOException {
+    public static void menu(int accNo) throws IOException {
         printMenu();
         int choice = new Scanner(System.in).nextInt();
         handleMenuChoice(choice, accNo);

@@ -32,6 +32,6 @@ public class BalanceInquiry {
         Main.menu(accNo);
     }
 
-    private int getAccountNumber(String[] subLine) { return Integer.parseInt(subLine[0]); }
-    private int getBalance(String[] subLine) { return Integer.parseInt(subLine[1]); }
+    public int getAccountNumber(String[] subLine) { return Integer.parseInt(subLine[0]); }
+    public int getBalance(String[] subLine) { return Integer.parseInt(subLine[1]); }
 }

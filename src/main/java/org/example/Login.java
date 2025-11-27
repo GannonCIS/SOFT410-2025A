@@ -38,7 +38,7 @@ public class Login {
         }
     }
 
-    boolean loginAuth(int accNo, String pass) throws IOException {
+    public boolean loginAuth(int accNo, String pass) throws IOException {
         if (checkPostgres(accNo, pass)) {
             System.out.println("Login Successful!!\n");
             Main.menu(accNo);
@@ -49,7 +49,7 @@ public class Login {
         }
     }
 
-    boolean checkPostgres(int accNo, String pass) {
+    public boolean checkPostgres(int accNo, String pass) {
         String query = "SELECT password_hash FROM users WHERE username = ?";
         try (PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setString(1, String.valueOf(accNo));

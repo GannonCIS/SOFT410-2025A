@@ -2,6 +2,8 @@ package org.example;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Observer;
@@ -27,7 +29,9 @@ public class BankStatementObserver implements TransactionObserver {
 
     }
 
-    void debitWrite(TransactionEvent event) throws IOException {
+    public void debitWrite(TransactionEvent event) throws IOException {
+        Files.createDirectories(Paths.get("db/Bank Statement"));
+
         String description = "Transfer to " + event.getToAccount();
         String date = event.getTimestamp().toLocalDate().toString();
         String time = event.getTimestamp().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
@@ -37,7 +41,9 @@ public class BankStatementObserver implements TransactionObserver {
 
     }
 
-    void creditWrite(TransactionEvent event) throws IOException {
+    public void creditWrite(TransactionEvent event) throws IOException {
+        Files.createDirectories(Paths.get("db/Bank Statement"));
+
         String description = "Transfer from " + event.getFromAccount();
         String date = event.getTimestamp().toLocalDate().toString();
         String time = event.getTimestamp().format(DateTimeFormatter.ofPattern("HH:mm:ss"));

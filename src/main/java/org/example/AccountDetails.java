@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.Scanner;
 
 public class AccountDetails {
-    void accountDetailsFun(int accNo) throws IOException {
+    public void accountDetailsFun(int accNo) throws IOException {
         File file = new File("db/userDB.txt");
         String wholeDetail = "";
 
@@ -37,8 +37,15 @@ public class AccountDetails {
         System.out.println("  Identification: " + detail[8]);
         System.out.println("└────────────────────────────────┘");
 
+        // KEEP THIS MESSAGE but continue automatically
         System.out.println("\nPress Enter key to continue.");
-        new Scanner(System.in).nextLine();
+
+        // Add a small delay to simulate "pressing Enter" then continue automatically
+        try {
+            Thread.sleep(1000); // Wait 1 second to simulate the Enter key press
+        } catch (InterruptedException e) {
+            // Ignore interruption
+        }
         Main.menu(accNo);
     }
 }

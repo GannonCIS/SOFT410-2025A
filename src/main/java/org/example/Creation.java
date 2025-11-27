@@ -11,7 +11,7 @@ public class Creation {
 
     private static final int INITIAL_BAL = 69;
 
-    void createAccFun() {
+    public void createAccFun() {
         try {
             int accNo = accNoCreation();
             String[] accLineInfo = getUserInfoFromUser();
@@ -28,7 +28,7 @@ public class Creation {
         }
     }
 
-    int accNoCreation() {
+    public int accNoCreation() {
         int accNo = 1;
         try (Connection conn = DriverManager.getConnection(
                 "jdbc:postgresql://localhost:5432/auth_system",
@@ -47,7 +47,7 @@ public class Creation {
         return accNo;
     }
 
-    void writeToPostgres(int accNo, String[] acc) {
+    public void writeToPostgres(int accNo, String[] acc) {
         try (Connection conn = DriverManager.getConnection(
                 "jdbc:postgresql://localhost:5432/auth_system",
                 "postgres", "2331")) {
@@ -78,7 +78,7 @@ public class Creation {
         }
     }
 
-    String[] getUserInfoFromUser() {
+    public String[] getUserInfoFromUser() {
         String[] accLineInfo = new String[9];
         Scanner scanner = new Scanner(System.in);
 
