@@ -2,43 +2,24 @@ pipeline {
     agent any
 
     stages {
-        stage('Clean Workspace') {
-            steps {
-                echo 'Cleaning workspace.'
-                deleteDir()
-            }
-        }
-
         stage('Build') {
             steps {
-                script {
-                    if (fileExists('./gradlew')) {
-                        echo 'Using Gradle Wrapper.'
-                        sh 'chmod +x ./gradlew'
-                        sh './gradlew build'
-                    } else {
-                        echo 'Using system Gradle.'
-                        sh 'gradle build'
-                    }
-                }
+                echo 'Building with Gradle Wrapper.'
+                sh 'chmod +x ./gradlew'
+                sh './gradlew build'
             }
         }
 
         stage('Test') {
             steps {
-                script {
-                    if (fileExists('./gradlew')) {
-                        sh './gradlew test'
-                    } else {
-                        sh 'gradle test'
-                    }
-                }
+                echo 'Running tests with Gradle Wrapper.'
+                sh './gradlew test'
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Deploying.'
+                echo 'Deploying...'
             }
         }
     }
