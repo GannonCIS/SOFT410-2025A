@@ -2,47 +2,53 @@ pipeline {
     agent any
 
     environment {
-        POSTGRES_CONTAINER = "test-postgres"
-        POSTGRES_DB = "auth_system"
-        POSTGRES_USER = "postgres"
-        POSTGRES_PASSWORD = "2331"
+        POSTGRES_PASSWORD = '2331'
+        POSTGRES_DB = 'auth_system'
+        POSTGRES_USER = 'postgres'
+        POSTGRES_PORT = '5432'
     }
 
     stages {
-        stage('Start DB') {
+        stage('Start PostgreSQL') {
             steps {
-                echo 'Starting PostgreSQL container.'
+                echo 'Starting PostgreSQL container...'
                 sh """
-                docker run --name $POSTGRES_CONTAINER -e POSTGRES_USER=$POSTGRES_USER -e POSTGRES_PASSWORD=$POSTGRES_PASSWORD -e POSTGRES_DB=$POSTGRES_DB -p 5432:5432 -d postgres
-                sleep 10
+                    docker run -d --name pg-test \
+                    -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
+                    -e POSTGRES_DB=${POSTGRES_DB} \
+                    -e POSTGRES_USER=${POSTGRES_USER} \
+                    -p ${POSTGRES_PORT}:${POSTGRES_PORT} \
+                    postgres
                 """
+                echo 'Waiting for DB to be ready...'
+                sh 'sleep 10'
             }
         }
 
         stage('Build') {
             steps {
-                echo 'Building..'
+                echo 'Building project...'
                 sh './gradlew build'
             }
         }
 
         stage('Test') {
             steps {
-                echo 'Testing..'
+                echo 'Running tests...'
                 sh './gradlew test'
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Deploying....'
+                echo 'Deploying...'
             }
         }
     }
 
     post {
         always {
-            echo 'Creating test report'
+            echo 'Collecting test reports...'
             junit '**/build/test-results/test/*.xml'
             publishHTML(target: [
                 reportDir: 'build/reports/tests/test',
@@ -53,7 +59,7 @@ pipeline {
                 keepAll: true
             ])
             echo 'Stopping PostgreSQL container...'
-            sh "docker stop $POSTGRES_CONTAINER && docker rm $POSTGRES_CONTAINER || true"
+            sh 'docker stop pg-test && docker rm pg-test'
         }
     }
 }
