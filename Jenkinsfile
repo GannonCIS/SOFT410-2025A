@@ -4,21 +4,21 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                echo 'Building...'
-                bat 'gradlew build'
+                echo 'Building..'
+                bat 'gradlew.bat build'
             }
         }
 
         stage('Test') {
             steps {
-                echo 'Testing...'
-                bat 'gradlew test -Dtest.env=true'
+                echo 'Testing..'
+                bat 'gradlew.bat test'
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Deploying...'
+                echo 'Deploying....'
             }
         }
     }
