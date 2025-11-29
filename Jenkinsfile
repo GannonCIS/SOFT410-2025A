@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Clean Workspace') {
             steps {
-                echo 'Cleaning workspace.'
+                echo 'Cleaning workspace...'
                 cleanWs()
             }
         }
@@ -12,14 +12,14 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building...'
-                bat 'gradlew.bat build'
+                sh './gradlew build'
             }
         }
 
         stage('Test') {
             steps {
                 echo 'Testing...'
-                bat 'gradlew.bat test'
+                sh './gradlew test'
             }
         }
 
