@@ -1,39 +1,14 @@
 package test;
 
 import org.example.BalanceInquiry;
-import org.junit.jupiter.api.*;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class BalanceInquiryUnitTest {
 
-    private BalanceInquiry balanceInquiry;
-
-    @BeforeEach
-    void setup(){
-        balanceInquiry = new BalanceInquiry();
-    }
-
     @Test
-    void getAccountNumberTest(){
-        //account number = 1001, account balance = 1500
-        String[] testData = {"1001", "1500"};
-
-        //Actual number
-        int actual = balanceInquiry.getAccountNumber(testData);
-
-        assertEquals(1001, actual);
+    void existenceTest(){
+        BalanceInquiry balanceInquiry = new BalanceInquiry();
+        assertNotNull(balanceInquiry);
     }
-
-    @Test
-    void getBalanceTest(){
-        String[] testData = {"1001", "1500"};
-
-        int actual = balanceInquiry.getBalance(testData);
-
-        assertEquals(1500, actual);
-
-    }
-
-
-
 }

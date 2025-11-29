@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourcePerFileMappings">
+    <file url="file://$PROJECT_DIR$/src/main/java/org/example/AccountDetails.java" value="90ee3448-f215-4014-9863-2b3b87f104a4" />
+    <file url="file://$PROJECT_DIR$/src/main/java/org/example/BalanceRepository.java" value="90ee3448-f215-4014-9863-2b3b87f104a4" />
+    <file url="file://$PROJECT_DIR$/src/main/java/org/example/BankStatement.java" value="90ee3448-f215-4014-9863-2b3b87f104a4" />
+    <file url="file://$PROJECT_DIR$/src/main/java/org/example/BankStatementObserver.java" value="90ee3448-f215-4014-9863-2b3b87f104a4" />
+    <file url="file://$PROJECT_DIR$/src/main/java/org/example/Creation.java" value="90ee3448-f215-4014-9863-2b3b87f104a4" />
+    <file url="file://$PROJECT_DIR$/src/main/java/org/example/Login.java" value="90ee3448-f215-4014-9863-2b3b87f104a4" />
+    <file url="file://$PROJECT_DIR$/src/main/java/org/example/Main.java" value="90ee3448-f215-4014-9863-2b3b87f104a4" />
+  </component>
+</project>

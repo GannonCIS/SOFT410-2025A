@@ -1,111 +1,74 @@
 package org.example;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.util.Scanner;
 import org.mindrot.jbcrypt.BCrypt;
 
 public class Creation {
 
-    private static final int INITIAL_BAL = 69;
-
     public void createAccFun() {
-        try {
-            int accNo = accNoCreation();
-            String[] accLineInfo = getUserInfoFromUser();
-            writeToPostgres(accNo, accLineInfo);
+        try (Scanner s = new Scanner(System.in)) {
+            int accNo = generateAccNo();
 
-            System.out.println("\nAccount created successfully!\n");
-            System.out.println("Your account number is: " + accNo);
-            System.out.println("Your password is: " + accLineInfo[8] + "\n");
+            System.out.print("First Name: "); String firstName = s.next();
+            System.out.print("Last Name: "); String lastName = s.next();
+            System.out.print("DOB (yyyy-MM-dd): "); Date dob = Date.valueOf(s.next());
+            System.out.print("Gender: "); String gender = s.next();
+            System.out.print("Address: "); String address = s.next();
+            System.out.print("Phone: "); String phone = s.next();
+            System.out.print("Email: "); String email = s.next();
+            System.out.print("ID Number: "); String idNumber = s.next();
+            System.out.print("Password: "); String password = s.next();
 
+            insertUser(accNo, password);
+            insertUserDetails(accNo, firstName, lastName, dob, gender, address, phone, email, idNumber);
+
+            System.out.printf("Account created! Number: %d, Password: %s%n", accNo, password);
             Main.menu(accNo);
+
         } catch (Exception e) {
             System.out.println("Account creation failed: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 
-    public int accNoCreation() {
-        int accNo = 1;
-        try (Connection conn = DriverManager.getConnection(
-                "jdbc:postgresql://localhost:5432/auth_system",
-                "postgres", "2331");
-             PreparedStatement ps = conn.prepareStatement(
-                     "SELECT MAX(username::int) AS max_acc FROM users");
-             var rs = ps.executeQuery()) {
-
-            if (rs.next() && rs.getInt("max_acc") != 0) {
-                accNo = rs.getInt("max_acc") + 1;
-            }
-
-        } catch (Exception e) {
-            System.out.println("Error generating account number: " + e.getMessage());
-        }
-        return accNo;
-    }
-
-    public void writeToPostgres(int accNo, String[] acc) {
-        try (Connection conn = DriverManager.getConnection(
-                "jdbc:postgresql://localhost:5432/auth_system",
-                "postgres", "2331")) {
-            try (PreparedStatement ps = conn.prepareStatement(
-                    "INSERT INTO users(username, password_hash, role) VALUES (?, ?, ?)")) {
-                ps.setString(1, String.valueOf(accNo));
-                ps.setString(2, BCrypt.hashpw(acc[8], BCrypt.gensalt()));
-                ps.setString(3, "user");
-                ps.executeUpdate();
-            }
-
-            try (PreparedStatement ps2 = conn.prepareStatement(
-                    "INSERT INTO user_details(acc_no, first_name, last_name, dob, gender, address, phone, email, citizenship, balance) " +
-                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
-
-                ps2.setInt(1, accNo);
-                for (int i = 0; i < 8; i++) ps2.setString(i + 2, acc[i]);
-                ps2.setDate(4, Date.valueOf(acc[2])); // dob conversion
-                ps2.setInt(10, INITIAL_BAL);
-                ps2.executeUpdate();
-            }
-
-            System.out.println("\nPostgreSQL insertion successful!");
-
-        } catch (Exception e) {
-            System.out.println("PostgreSQL write failed: " + e.getMessage());
-            e.printStackTrace();
+    private int generateAccNo() throws Exception {
+        String query = "SELECT MAX(username::int) AS max_acc FROM users";
+        try (Connection conn = DB.get();
+             var stmt = conn.createStatement();
+             var rs = stmt.executeQuery(query)) {
+            return (rs.next() && rs.getInt("max_acc") != 0) ? rs.getInt("max_acc") + 1 : 1;
         }
     }
 
-    public String[] getUserInfoFromUser() {
-        String[] accLineInfo = new String[9];
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.println("Enter your Name (First Last): ");
-        String[] fullNameArr = scanner.nextLine().trim().split(" ");
-        if (fullNameArr.length != 2) {
-            System.out.println("Please provide both first name and last name.");
-            return getUserInfoFromUser();
+    private void insertUser(int accNo, String password) throws Exception {
+        String query = "INSERT INTO users(username, password_hash, balance) VALUES (?, ?, 0)";
+        try (Connection conn = DB.get();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setString(1, String.valueOf(accNo));
+            ps.setString(2, BCrypt.hashpw(password, BCrypt.gensalt()));
+            ps.executeUpdate();
         }
-        accLineInfo[0] = fullNameArr[0];
-        accLineInfo[1] = fullNameArr[1];
+    }
 
-        System.out.println("Enter your Date of Birth (YYYY-MM-DD): ");
-        accLineInfo[2] = scanner.nextLine();
-        System.out.println("Enter your Gender: ");
-        accLineInfo[3] = scanner.nextLine();
-        System.out.println("Enter your Address: ");
-        accLineInfo[4] = scanner.nextLine();
-        System.out.println("Enter your Phone Number: ");
-        accLineInfo[5] = scanner.nextLine();
-        System.out.println("Enter your Email: ");
-        accLineInfo[6] = scanner.nextLine();
-        System.out.println("Enter your Citizenship Number: ");
-        accLineInfo[7] = scanner.nextLine();
-        System.out.println("Create a Password for your Account: ");
-        accLineInfo[8] = scanner.nextLine();
-
-        return accLineInfo;
+    private void insertUserDetails(int accNo, String firstName, String lastName, Date dob,
+                                   String gender, String address, String phone,
+                                   String email, String idNumber) throws Exception {
+        String query = "INSERT INTO user_details(acc_no, first_name, last_name, dob, gender, address, phone, email, id_number) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = DB.get();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setInt(1, accNo);
+            ps.setString(2, firstName);
+            ps.setString(3, lastName);
+            ps.setDate(4, dob);
+            ps.setString(5, gender);
+            ps.setString(6, address);
+            ps.setString(7, phone);
+            ps.setString(8, email);
+            ps.setString(9, idNumber);
+            ps.executeUpdate();
+        }
     }
 }

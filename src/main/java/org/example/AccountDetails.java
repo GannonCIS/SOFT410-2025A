@@ -1,51 +1,48 @@
 package org.example;
 
-import java.io.File;
-import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Scanner;
 
 public class AccountDetails {
-    public void accountDetailsFun(int accNo) throws IOException {
-        File file = new File("db/userDB.txt");
-        String wholeDetail = "";
 
-        try (Scanner scanner = new Scanner(file)) {
-            while (scanner.hasNextLine()) {
-                String[] subLine = scanner.nextLine().split(" ");
-                if (accNo == Integer.parseInt(subLine[0])) {
-                    wholeDetail = String.join(" ", subLine);
-                    break;
-                }
+    public void accountDetailsFun(int accNo) throws Exception {
+        String[] data = getUser(accNo);
+        if (data == null) { System.out.println("Account not found!"); return; }
+
+        System.out.printf("""
+                Full Name: %s %s
+                DOB: %s
+                Gender: %s
+                Address: %s
+                Phone: %s
+                Email: %s
+                ID: %s
+                """, data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
+
+        new Scanner(System.in).nextLine();
+        Main.menu(accNo);
+    }
+
+    private String[] getUser(int accNo) throws Exception {
+        String query = "SELECT first_name, last_name, dob, gender, address, phone, email, id_number FROM user_details WHERE acc_no=?";
+        try (Connection conn = DB.get();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setInt(1, accNo);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) return null;
+                return new String[]{
+                        rs.getString("first_name"),
+                        rs.getString("last_name"),
+                        rs.getString("dob"),
+                        rs.getString("gender"),
+                        rs.getString("address"),
+                        rs.getString("phone"),
+                        rs.getString("email"),
+                        rs.getString("id_number")
+                };
             }
         }
-
-        if (wholeDetail.isEmpty()) {
-            System.out.println("Account not found!");
-            return;
-        }
-
-        String[] detail = wholeDetail.split(" ");
-        System.out.println("Account Details: ");
-        System.out.println("┌────────────────────────────────┐");
-        System.out.println("  Full Name: " + detail[1] + " " + detail[2]);
-        System.out.println("  Account Number: " + detail[0]);
-        System.out.println("  Gender: " + detail[4]);
-        System.out.println("  Address: " + detail[5]);
-        System.out.println("  Date of Birth: " + detail[3]);
-        System.out.println("  Phone number: " + detail[6]);
-        System.out.println("  Email: " + detail[7]);
-        System.out.println("  Identification: " + detail[8]);
-        System.out.println("└────────────────────────────────┘");
-
-        // KEEP THIS MESSAGE but continue automatically
-        System.out.println("\nPress Enter key to continue.");
-
-        // Add a small delay to simulate "pressing Enter" then continue automatically
-        try {
-            Thread.sleep(1000); // Wait 1 second to simulate the Enter key press
-        } catch (InterruptedException e) {
-            // Ignore interruption
-        }
-        Main.menu(accNo);
     }
 }

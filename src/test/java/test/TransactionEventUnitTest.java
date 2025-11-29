@@ -1,48 +1,47 @@
 package test;
 
 import org.example.TransactionEvent;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-
 public class TransactionEventUnitTest {
+
+    private TransactionEvent event;
+
+    @BeforeEach
+    void setup() {
+        event = new TransactionEvent(1001, 1002, 500, "Test", true);
+    }
+
     @Test
-    void getFromAccountTest() {
-        TransactionEvent event = new TransactionEvent(1001, 1002, 500, "Test", true);
+    void getFromAccount() {
         assertEquals(1001, event.getFromAccount());
     }
 
     @Test
-    void getToAccountTest() {
-        TransactionEvent event = new TransactionEvent(1001, 1002, 500, "Test", true);
+    void getToAccount() {
         assertEquals(1002, event.getToAccount());
     }
 
     @Test
-    void getAmountTest() {
-        TransactionEvent event = new TransactionEvent(1001, 1002, 500, "Test", true);
+    void getAmount() {
         assertEquals(500, event.getAmount());
     }
 
     @Test
-    void getRemarksTest() {
-        TransactionEvent event = new TransactionEvent(1001, 1002, 500, "Test", true);
+    void getRemarks() {
         assertEquals("Test", event.getRemarks());
     }
 
     @Test
-    void getTimestampTest() {
-        TransactionEvent event = new TransactionEvent(1001, 1002, 500, "Test", true);
+    void getTimestamp() {
         assertNotNull(event.getTimestamp());
     }
 
     @Test
-    void isSuccessTest() {
-        TransactionEvent event = new TransactionEvent(1001, 1002, 500, "Test", true);
+    void isSuccess() {
         assertTrue(event.isSuccess());
     }
-
-
-
-
 }

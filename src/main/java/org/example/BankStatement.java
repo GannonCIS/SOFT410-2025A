@@ -1,49 +1,39 @@
 package org.example;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Scanner;
 
 public class BankStatement {
-    void bankStatementFun(int accNo) throws IOException {
-        File file = new File("db/Bank Statement/acc_" + accNo + ".txt");
+    public void printStatement(int accNo) {
+        String query = "SELECT amount, description, remarks, transaction_time FROM transactions WHERE account = ? ORDER BY transaction_time";
+        try (Connection conn = DB.get();
+             PreparedStatement ps = conn.prepareStatement(query)) {
 
-        try (Scanner scanner = new Scanner(file)) {
-            printHeader();
-            printStatementLines(scanner);
-            printFooter();
-        } catch (FileNotFoundException e) {
-            System.out.println("No Transaction found!");
+            ps.setInt(1, accNo);
+            try (ResultSet rs = ps.executeQuery()) {
+
+                System.out.println("+--------+------------------+----------------+-------------------------+");
+                System.out.printf("| %-6s | %-16s | %-14s | %-23s |%n", "Amount", "Description", "Remarks", "Time");
+                System.out.println("+--------+------------------+----------------+-------------------------+");
+
+                while (rs.next()) {
+                    System.out.printf("| %6d | %-16s | %-14s | %-23s |%n",
+                            rs.getInt("amount"),
+                            rs.getString("description"),
+                            rs.getString("remarks"),
+                            rs.getTimestamp("transaction_time").toString());
+                }
+
+                System.out.println("+--------+------------------+----------------+-------------------------+");
+            }
+        } catch (Exception e) {
+            System.out.println("Failed to fetch statement: " + e.getMessage());
         }
-        System.out.println("\nPress Enter key to continue...");
+
         new Scanner(System.in).nextLine();
-        Main.menu(accNo);
-    }
-     public void printStatementLines(Scanner scanner) {
-        while (scanner.hasNextLine()) {
-            String[] trLine = scanner.nextLine().split(" ");
-            if (trLine.length < 8) continue;
-
-            String description = String.join(" ", trLine[0], trLine[1], trLine[2]);
-
-            System.out.printf("%-21s | %-6s | $%-6s | %-7s | %-10s | %-8s%n",
-                    description, trLine[3], trLine[4], trLine[5], trLine[6], trLine[7]);
-        }
-    }
-
-// Long Method bankStatementFun() has been reduced to handle 2 clean responsibilities
-
-
-    public void printHeader() {
-        System.out.println("\n");
-        System.out.println("                           | Bank Statement |");
-        System.out.println("---------------------------------------------------------------------------");
-        System.out.printf("%-21s | %-6s | %-6s | %-7s | %-10s | %-8s%n",
-                "Description", "Type", "Amount", "Remarks", "Date", "Time");
-        System.out.println("---------------------------------------------------------------------------");
-    }
-    public void printFooter() {
-        System.out.println("---------------------------------------------------------------------------");
+        try { Main.menu(accNo); } catch (Exception ignored) {}
     }
 }

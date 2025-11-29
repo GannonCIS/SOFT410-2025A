@@ -1,37 +1,19 @@
 package org.example;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Scanner;
 
 public class BalanceInquiry {
-    void balanceInquiryFun(int accNo) throws IOException {
-        File file = new File("db/balanceDB.txt");
-        int accBalance = -1;
 
-        try (Scanner scanner = new Scanner(file)) {
-            while (scanner.hasNextLine()) {
-                String[] subLine = scanner.nextLine().split(" ");
-                if (accNo == getAccountNumber(subLine)) {
-                    accBalance = getBalance(subLine);
-                    break;
-                }
-            }
-        }
+    private final BalanceRepository repo = new BalanceRepository();
 
-        if (accBalance == -1) {
-            System.out.println("We're having some issues, Try Again!");
+    public void balanceInquiryFun(int accNo) throws Exception {
+        int balance = repo.getBalance(accNo);
+        if (balance == -1) {
+            System.out.println("Account not found!");
             return;
         }
-
-        System.out.println("┌───────────────────────────────┐");
-        System.out.println("  Your current balance is $" + accBalance + "   ");
-        System.out.println("└───────────────────────────────┘");
-        System.out.println("Press Enter key to continue...");
-        new Scanner(System.in).nextLine();
+        System.out.println("Your balance: $" + balance);
+        new java.util.Scanner(System.in).nextLine();
         Main.menu(accNo);
     }
-
-    public int getAccountNumber(String[] subLine) { return Integer.parseInt(subLine[0]); }
-    public int getBalance(String[] subLine) { return Integer.parseInt(subLine[1]); }
 }

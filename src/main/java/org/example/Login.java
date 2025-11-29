@@ -1,74 +1,42 @@
 package org.example;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Scanner;
 import org.mindrot.jbcrypt.BCrypt;
 
 public class Login {
 
-    private Connection conn;
+    public void loginFun() throws Exception {
+        Scanner s = new Scanner(System.in);
+        System.out.print("Acc No: ");
+        int accNo = s.nextInt();
+        System.out.print("Password: ");
+        String pass = s.next();
 
-    public Login() {
-        try {
-            conn = DriverManager.getConnection(
-                    "jdbc:postgresql://localhost:5432/auth_system",
-                    "postgres",
-                    "2331"
-            );
-        } catch (SQLException e) {
-            System.out.println("Failed to connect to PostgreSQL: " + e.getMessage());
-            System.exit(1);
-        }
-    }
-
-    void loginFun() throws IOException {
-        Scanner scanner = new Scanner(System.in);
-        boolean success = false;
-        while (!success) {
-            System.out.print("Enter your Account Number: ");
-            int accNo = scanner.nextInt();
-            System.out.print("Enter your Password: ");
-            String pass = scanner.next();
-            success = loginAuth(accNo, pass);
-        }
-    }
-
-    public boolean loginAuth(int accNo, String pass) throws IOException {
-        if (checkPostgres(accNo, pass)) {
-            System.out.println("Login Successful!!\n");
+        String hash = getPasswordHash(accNo);
+        if (hash != null && BCrypt.checkpw(pass, hash)) {
+            System.out.println("Login successful!");
             Main.menu(accNo);
-            return true;
         } else {
-            System.out.println("\nInvalid Account Number or Password! Try again.\n");
-            return false;
+            System.out.println("Invalid credentials!");
+            loginFun();
         }
     }
 
-    public boolean checkPostgres(int accNo, String pass) {
+    private String getPasswordHash(int accNo) throws Exception {
         String query = "SELECT password_hash FROM users WHERE username = ?";
-        try (PreparedStatement ps = conn.prepareStatement(query)) {
+        try (var conn = DB.get(); var ps = conn.prepareStatement(query)) {
             ps.setString(1, String.valueOf(accNo));
             try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) return false;
-                String hash = rs.getString("password_hash");
-                return BCrypt.checkpw(pass, hash);
+                return rs.next() ? rs.getString("password_hash") : null;
             }
-        } catch (SQLException e) {
-            System.out.println("PostgreSQL login error: " + e.getMessage());
-            return false;
         }
     }
 
-    public void closeConnection() {
-        try {
-            if (conn != null && !conn.isClosed()) conn.close();
-        } catch (SQLException e) {
-            System.out.println("Error closing PostgreSQL connection: " + e.getMessage());
-        }
+    public boolean checkPassword(int accNo, String pass) throws Exception {
+        String hash = getPasswordHash(accNo);
+        return hash != null && org.mindrot.jbcrypt.BCrypt.checkpw(pass, hash);
     }
+
 }

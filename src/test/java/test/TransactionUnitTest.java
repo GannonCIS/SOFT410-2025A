@@ -3,34 +3,17 @@ package test;
 import org.example.BankStatementObserver;
 import org.example.Transaction;
 import org.example.TransactionEvent;
-import org.example.TransactionObserver;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 public class TransactionUnitTest {
 
-    //Test if it can add observers
     @Test
-    void AddObserversTest(){
-        Transaction transaction = new Transaction();
-        TransactionObserver observer = new BankStatementObserver();
+    void observerLogging() {
+        Transaction t = new Transaction();
+        TransactionEvent e = new TransactionEvent(1001, 1002, 500, "test", true);
 
-        transaction.addObserver(observer);
-
-        //If no exception, it works
-        assertTrue(true);
+        assertDoesNotThrow(() -> new BankStatementObserver().onTransactionCompleted(e));
     }
-
-    @Test
-    void notifyObserversTest(){
-        Transaction transaction = new Transaction();
-        TransactionEvent event = new TransactionEvent(1001, 1002, 500, "test", true);
-
-        //Should not throw exception when notifying
-        assertDoesNotThrow(() -> transaction.notifyObservers(event));
-
-    }
-
-
-
 }

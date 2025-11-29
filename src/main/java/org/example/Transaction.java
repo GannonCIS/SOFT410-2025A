@@ -1,98 +1,77 @@
 package org.example;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.ArrayList;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Scanner;
-import java.util.List;
 
-//Observer pattern: Subject (the thing being observed)
-
-/*Benefit of observer: The Transaction class no longer needs to
-know HOW to write bank statements, it just announces WHEN transactions happen.
-The BankStatementObserver handles the "how".
-*/
 public class Transaction {
 
-    //OBSERVER PATTERN: List to keep track of all observers
-    private final List<TransactionObserver> observes = new ArrayList<>();
-    private final BalanceRepository balanceRepo = new BalanceRepository();
+    private final BankStatementObserver logger = new BankStatementObserver();
 
-    //OBSERVER PATTERN: Constructor to register observer
-    public Transaction(){
-        observes.add(new BankStatementObserver());
+    public void transactionFun(int accNo) throws Exception {
+        Scanner s = new Scanner(System.in);
+        System.out.print("Receiver Acc: ");
+        int r = s.nextInt();
+        System.out.print("Amount: ");
+        int amt = s.nextInt();
+        System.out.print("Remarks: ");
+        String remark = s.next();
+
+        if (!accountExists(r)) {
+            System.out.println("Invalid receiver!");
+            return;
+        }
+
+        int fromBal = getBalance(accNo);
+        if (fromBal < amt) {
+            System.out.println("Insufficient balance!");
+            return;
+        }
+
+        updateBalance(accNo, fromBal - amt);
+        updateBalance(r, getBalance(r) + amt);
+
+        TransactionEvent event = new TransactionEvent(accNo, r, amt, remark, true);
+        logger.onTransactionCompleted(event);
+
+        System.out.println("Transaction successful!");
+        Main.menu(accNo);
     }
 
-    //OBSERVER PATTERN: Method to add more observers
-    public void addObserver(TransactionObserver observer){
-        observes.add(observer);
-    }
-
-
-    public void notifyObservers(TransactionEvent event){
-        for(TransactionObserver observer : observes){
-            try{
-                observer.onTransactionCompleted(event);
-            }catch(Exception e){
-                System.out.println("Observer error: " + e.getMessage());
+    private boolean accountExists(int accNo) throws Exception {
+        String query = "SELECT 1 FROM users WHERE username = ?";
+        try (var conn = DB.get(); var ps = conn.prepareStatement(query)) {
+            ps.setString(1, String.valueOf(accNo));
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
             }
         }
     }
 
-
-
-
-    void transactionFun(int accNo) throws IOException {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Receiver's Account Number: ");
-        int receiverAcc = scanner.nextInt();
-        System.out.print("Amount: ");
-        int transferAmount = scanner.nextInt();
-        scanner.nextLine();
-        System.out.print("Remarks: ");
-        String remarks = scanner.nextLine();
-        System.out.println();
-        allTransaction(accNo, receiverAcc, transferAmount, remarks);
-    }
-
-
-
-    void allTransaction(int accNo, int receiverAcc, int amount, String remarks) throws IOException {
-
-        if (!balanceRepo.accountExists(receiverAcc)) {
-            System.out.println("Incorrect Account Number!");
-            return;
+    private int getBalance(int accNo) throws Exception {
+        String query = "SELECT balance FROM users WHERE username = ?";
+        try (var conn = DB.get(); var ps = conn.prepareStatement(query)) {
+            ps.setString(1, String.valueOf(accNo));
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt("balance") : 0;
+            }
         }
+    }
 
-        if (!hasSufficientBalance(accNo, amount)) {
-            System.out.println("Insufficient Balance!");
-            return;
+    private void updateBalance(int accNo, int newBalance) throws Exception {
+        String query = "UPDATE users SET balance = ? WHERE username = ?";
+        try (var conn = DB.get(); var ps = conn.prepareStatement(query)) {
+            ps.setInt(1, newBalance);
+            ps.setString(2, String.valueOf(accNo));
+            ps.executeUpdate();
         }
-
-        applyTransaction(accNo, receiverAcc, amount);
-
-        notifyObservers(new TransactionEvent(
-                accNo,
-                receiverAcc,
-                amount,
-                remarks,
-                true
-        ));
-
-        System.out.println("Transaction Successful!");
-        System.out.println("Press Enter key to continue...");
-        new Scanner(System.in).nextLine();
-        Main.menu(accNo);
     }
 
-    private boolean hasSufficientBalance(int accNo, int amount) throws IOException {
-        int balance = balanceRepo.getBalance(accNo);
-        return balance != -1 && balance >= amount;
+    public boolean accountExistsForTest(int accNo) throws Exception {
+        return accountExists(accNo);
     }
 
-    void applyTransaction(int accNo, int receiverAcc, int amount) throws IOException {
-        balanceRepo.updateBalances(accNo, receiverAcc, amount);
+    public int getBalanceForTest(int accNo) throws Exception {
+        return getBalance(accNo);
     }
 }

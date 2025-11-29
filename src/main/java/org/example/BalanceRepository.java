@@ -1,49 +1,36 @@
 package org.example;
 
-import java.io.*;
-import java.util.Scanner;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class BalanceRepository {
 
-    private static final String BALANCE_FILE = "db/balanceDB.txt";
-
-    public boolean accountExists(int accNo) throws IOException {
-        try (Scanner scanner = new Scanner(new File(BALANCE_FILE))) {
-            while (scanner.hasNextLine()) {
-                String[] line = scanner.nextLine().split(" ");
-                if (accNo == Integer.parseInt(line[0])) return true;
+    public int getBalance(int accNo) {
+        String query = "SELECT balance FROM users WHERE username = ?";
+        try (Connection conn = DB.get();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setString(1, String.valueOf(accNo));
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt("balance") : -1;
             }
-        }
-        return false;
+        } catch (Exception e) { return -1; }
     }
 
-    public int getBalance(int accNo) throws IOException {
-        try (Scanner scanner = new Scanner(new File(BALANCE_FILE))) {
-            while (scanner.hasNextLine()) {
-                String[] line = scanner.nextLine().split(" ");
-                if (accNo == Integer.parseInt(line[0])) return Integer.parseInt(line[1]);
-            }
+    public void updateBalance(int accNo, int newBalance) throws Exception {
+        String query = "UPDATE users SET balance = ? WHERE username = ?";
+        try (Connection conn = DB.get();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setInt(1, newBalance);
+            ps.setString(2, String.valueOf(accNo));
+            ps.executeUpdate();
         }
-        return -1;
     }
 
-    public void updateBalances(int sender, int receiver, int amount) throws IOException {
-        StringBuilder updated = new StringBuilder();
-
-        try (Scanner scanner = new Scanner(new File(BALANCE_FILE))) {
-            while (scanner.hasNextLine()) {
-                String[] line = scanner.nextLine().split(" ");
-                int acc = Integer.parseInt(line[0]);
-                int bal = Integer.parseInt(line[1]);
-
-                if (acc == sender) bal -= amount;
-                else if (acc == receiver) bal += amount;
-
-                updated.append(acc).append(" ").append(bal).append("\n");
-            }
-        }
-        try (FileWriter writer = new FileWriter(BALANCE_FILE)) {
-            writer.write(updated.toString());
-        }
+    public void transfer(int fromAcc, int toAcc, int amount) throws Exception {
+        int fromBal = getBalance(fromAcc);
+        int toBal = getBalance(toAcc);
+        updateBalance(fromAcc, fromBal - amount);
+        updateBalance(toAcc, toBal + amount);
     }
 }
