@@ -4,28 +4,41 @@ pipeline {
     stages {
         stage('Clean Workspace') {
             steps {
-                echo 'Cleaning workspace...'
+                echo 'Cleaning workspace.'
                 deleteDir()
             }
         }
 
         stage('Build') {
             steps {
-                echo 'Building...'
-                sh './gradlew build'
+                script {
+                    if (fileExists('./gradlew')) {
+                        echo 'Using Gradle Wrapper.'
+                        sh 'chmod +x ./gradlew'
+                        sh './gradlew build'
+                    } else {
+                        echo 'Using system Gradle.'
+                        sh 'gradle build'
+                    }
+                }
             }
         }
 
         stage('Test') {
             steps {
-                echo 'Testing...'
-                sh './gradlew test'
+                script {
+                    if (fileExists('./gradlew')) {
+                        sh './gradlew test'
+                    } else {
+                        sh 'gradle test'
+                    }
+                }
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Deploying...'
+                echo 'Deploying.'
             }
         }
     }
@@ -33,11 +46,11 @@ pipeline {
     post {
         always {
             echo 'Publishing test reports...'
-            junit '**/build/test-results/test/*.xml'
+            junit allowEmptyResults: true, testResults: '**/build/test-results/test/*.xml'
             publishHTML(target: [
                 reportDir: 'build/reports/tests/test',
                 reportFiles: 'index.html',
-                reportName: 'Test report',
+                reportName: 'Test Report',
                 alwaysLinkToLastBuild: true,
                 allowMissing: true,
                 keepAll: true
