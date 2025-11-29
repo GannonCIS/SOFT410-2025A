@@ -25,11 +25,7 @@ dependencies {
 
 test {
     useJUnitPlatform()
-
-    // Tell Gradle where to find your tests
-  // testClassesDirs = files('src/test/java')
-
-    // Include all packages in test source set
+    systemProperty "test.env", "true"
     sourceSets {
         test {
             java {
