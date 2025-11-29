@@ -1,24 +1,28 @@
 pipeline {
     agent any
 
+    options {
+        cleanWs()
+    }
+
     stages {
         stage('Build') {
             steps {
-                echo 'Building..'
+                echo 'Building...'
                 bat 'gradlew.bat build'
             }
         }
 
         stage('Test') {
             steps {
-                echo 'Testing..'
+                echo 'Testing...'
                 bat 'gradlew.bat test'
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Deploying....'
+                echo 'Deploying...'
             }
         }
     }
