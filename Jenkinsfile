@@ -11,7 +11,7 @@ pipeline {
     stages {
         stage('Start DB') {
             steps {
-                echo 'Starting PostgreSQL container...'
+                echo 'Starting PostgreSQL container.'
                 sh """
                 docker run --name $POSTGRES_CONTAINER -e POSTGRES_USER=$POSTGRES_USER -e POSTGRES_PASSWORD=$POSTGRES_PASSWORD -e POSTGRES_DB=$POSTGRES_DB -p 5432:5432 -d postgres
                 sleep 10
